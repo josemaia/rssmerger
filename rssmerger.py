@@ -60,7 +60,7 @@
 
 import sys
 import socket
-import urllib
+import urllib.request, urllib.parse, urllib.error
 import time
 import getopt
 import xml.dom.minidom
@@ -81,10 +81,10 @@ def rssFetch(url):
     """
 
     try:
-        f_rss = urllib.urlopen (url)
-    except IOError, e:
-        if not silent and url != 'merged.rss' and url != 'seen.rss':
-            print "Failed to retrieve RSS feed %s" % (url)
+        f_rss = urllib.request.urlopen (url)
+    except IOError as e:
+        if not silent and url != 'file://merged.rss' and url != 'file://seen.rss':
+            print("Failed to retrieve RSS feed %s" % (url))
         return False
 
     return f_rss.read()
@@ -149,7 +149,7 @@ def rssComposeItem (item):
     elemItem.appendChild(createElementText("link", item["link"]))
     elemItem.appendChild(createElementText("date", item["date"]))
     elemItem.appendChild(createElementTextNS("http://localhost/rssmerger/", "rm:publisher", item["publisher"]))
-    if item.has_key("description"):
+    if "description" in item:
         elemItem.appendChild(createElementText("description", item["description"]))
 
     return elemItem
@@ -161,7 +161,7 @@ def rssItemElementGetData (node, rssID):
         return(node.data.strip())
     else:
         if verbose:
-            print "Node has no data in %s! (HTML tag in data?)" % (rssID)
+            print("Node has no data in %s! (HTML tag in data?)" % (rssID))
         return("??")
 
 def rssExtractItem (node, rssID):
@@ -193,7 +193,7 @@ def rssExtractItem (node, rssID):
                 rssItem["date"] = rssItemElementGetData(childNode.firstChild, rssID)
 
     if verbose:
-        print "\t\tItem: " + rssItem["publisher"].encode('ascii', 'replace') + ": " + rssItem["title"].encode('ascii', 'replace')
+        print("\t\tItem: " + rssItem["publisher"].encode('ascii', 'replace') + ": " + rssItem["title"].encode('ascii', 'replace'))
 
     return rssItem
 
@@ -216,43 +216,43 @@ def usage():
     Print usage information to stdout
     """
 
-    print "Usage: "+sys.argv[0]+" [OPTION]"
-    print "Merges the items in a couple of RSS feeds to a single RSS feed."
-    print "Appearance of new items over time are remembered and added in the"
-    print "correct sequence"
-    print
-    print "Arguments:"
-    print "  -s, --silent        Silent. Do not report errors in RSS files"
-    print "  -q, --queries       Output all new RSS items as SQL queries"
-    print "  -i, --items ITEMS   Only keep ITEMS rss items in merged list"
-    print "  -v, --verbose       Be verbose"
-    print "  -V, --version       Show version information"
-    print "  -h, --help          Show short help message (this)"
-    print
-    print "(C) Ferry Boender, 2004-2013 <ferry.boender@electricmonk.nl>"
+    print("Usage: "+sys.argv[0]+" [OPTION]")
+    print("Merges the items in a couple of RSS feeds to a single RSS feed.")
+    print("Appearance of new items over time are remembered and added in the")
+    print("correct sequence")
+    print()
+    print("Arguments:")
+    print("  -s, --silent        Silent. Do not report errors in RSS files")
+    print("  -q, --queries       Output all new RSS items as SQL queries")
+    print("  -i, --items ITEMS   Only keep ITEMS rss items in merged list")
+    print("  -v, --verbose       Be verbose")
+    print("  -V, --version       Show version information")
+    print("  -h, --help          Show short help message (this)")
+    print()
+    print("(C) Ferry Boender, 2004-2013 <ferry.boender@electricmonk.nl>")
 
 def version():
     """
     Print version and other information to stdout
     """
 
-    print "RSSmerger v0.8"
-    print
-    print "Copyright (C) 2004-2013 Ferry Boender <ferry.boender@electricmonk.nl>"
-    print
-    print "This program is free software; you can redistribute it and/or modify"
-    print "it under the terms of the GNU General Public License as published by"
-    print "the Free Software Foundation; either version 2 of the License, or"
-    print "(at your option) any later version."
-    print
-    print "This program is distributed in the hope that it will be useful,"
-    print "but WITHOUT ANY WARRANTY; without even the implied warranty of"
-    print "MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the"
-    print "GNU General Public License for more details."
-    print
-    print "You should have received a copy of the GNU General Public License"
-    print "along with this program; if not, write to the Free Software"
-    print "Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA"
+    print("RSSmerger v0.8")
+    print()
+    print("Copyright (C) 2004-2013 Ferry Boender <ferry.boender@electricmonk.nl>")
+    print()
+    print("This program is free software; you can redistribute it and/or modify")
+    print("it under the terms of the GNU General Public License as published by")
+    print("the Free Software Foundation; either version 2 of the License, or")
+    print("(at your option) any later version.")
+    print()
+    print("This program is distributed in the hope that it will be useful,")
+    print("but WITHOUT ANY WARRANTY; without even the implied warranty of")
+    print("MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the")
+    print("GNU General Public License for more details.")
+    print()
+    print("You should have received a copy of the GNU General Public License")
+    print("along with this program; if not, write to the Free Software")
+    print("Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA")
 
 # Parse commandline options
 try:
@@ -282,14 +282,14 @@ socket.setdefaulttimeout(10)
 # Get seen items
 rssItemsSeen = []
 try:
-    rssSeen = rssFetch("merged.rss")
+    rssSeen = rssFetch("file://merged.rss")
     if rssSeen:
         root = xml.dom.minidom.parseString(rssSeen)
     else:
         root = xml.dom.minidom.Document()
 except:
     if not silent:
-        print "Cannot parse merged.rss: " + str(sys.exc_info()[1])
+        print("Cannot parse merged.rss: " + str(sys.exc_info()[1]))
         raise
 else:
     # Extract all seen items
@@ -300,14 +300,14 @@ else:
 # Get last seen items (to determine which items are new)
 rssItemsLastSeen = []
 try:
-    rssSeen = rssFetch("seen.rss")
+    rssSeen = rssFetch("file://seen.rss")
     if rssSeen:
         root = xml.dom.minidom.parseString(rssSeen)
     else:
         root = xml.dom.minidom.Document()
 except:
     if not silent:
-        print "Cannot parse seen.rss: " + str(sys.exc_info()[1])
+        print("Cannot parse seen.rss: " + str(sys.exc_info()[1]))
         raise
 else:
     # Extract all seen items
@@ -320,27 +320,27 @@ rssItemsMerged = []
 rssItemsNew = []
 rssItemsNewLastSeen = []
 
-for rssID in rssUrls.keys():
+for rssID in list(rssUrls.keys()):
     if verbose:
-        print "Processing %s" % (rssID)
+        print("Processing %s" % (rssID))
 
     rssItemsPub = []
 
     # Read published items
     try:
         if verbose:
-            print "\tRetrieving %s" % (rssUrls[rssID])
+            print("\tRetrieving %s" % (rssUrls[rssID]))
         rssPub = rssFetch(rssUrls[rssID])
         if not rssPub:
             if not silent:
-                print "\tError"
+                print("\tError")
         else:
             if verbose:
-                print "\tRetrieved."
+                print("\tRetrieved.")
         root = xml.dom.minidom.parseString(rssPub)
     except:
         if not silent:
-            print "Cannot parse " + rssUrls[rssID] + ": " + str(sys.exc_info()[1])
+            print("Cannot parse " + rssUrls[rssID] + ": " + str(sys.exc_info()[1]))
     else:
         # Walk through all root-items (handles xml-stylesheet, etc)
         for rootNode in root.childNodes:
@@ -348,7 +348,7 @@ for rssID in rssUrls.keys():
                 # Extract all items
                 node = rootNode
                 if verbose:
-                    print "\tFinding all published items in '%s'" % (rssID)
+                    print("\tFinding all published items in '%s'" % (rssID))
 
                 rssItemsPub = rssFindItems(node, rssItemsPub, rssID)
 
@@ -357,7 +357,7 @@ for rssID in rssUrls.keys():
                     lastId = -1
                     for i in range(len(rssItemsLastSeen)):
                         if verbose:
-                            print "Find last seen: " + rssItemsLastSeen[i]["publisher"].encode('ascii', 'replace') + " - " + rssID
+                            print("Find last seen: " + rssItemsLastSeen[i]["publisher"].encode('ascii', 'replace') + " - " + rssID)
                         if rssItemsLastSeen[i]["publisher"] == rssID:
                             lastId = i
 
@@ -365,7 +365,7 @@ for rssID in rssUrls.keys():
                     if lastId > -1:
                         rssItemLastSeenTitle = rssItemsLastSeen[lastId]["title"]
                         if verbose:
-                            print "\tLast seen for " + rssID + ": " + rssItemLastSeenTitle.encode('ascii', 'replace')
+                            print("\tLast seen for " + rssID + ": " + rssItemLastSeenTitle.encode('ascii', 'replace'))
 
                     # First extract all new rss items
                     for rssItem in rssItemsPub:
@@ -389,7 +389,7 @@ for rssItem in rssItemsSeen:
 
 # find feeds which don't have a 'last seen' item anymore due to errors in
 # the rss feed or something and set it back to the previous last seen item
-for rssID in rssUrls.keys():
+for rssID in list(rssUrls.keys()):
     found = 0;
     for rssItem in rssItemsNewLastSeen:
         if rssItem["publisher"] == rssID:
@@ -408,7 +408,7 @@ if queries:
         for property in rssItem:
             rssItem[property] = rssItem[property].encode('ascii', 'replace')
         qry = "INSERT INTO rssitems (title, link, date, publisher, description) VALUES ('%s','%s','%s','%s', '%s');" % (rssItem["title"].replace('\'', '\\\''), rssItem["link"].replace('\'', '\\\''), rssItem["date"].replace('\'', '\\\''), rssItem["publisher"].replace('\'', '\\\''), rssItem["description"].replace('\'', '\\\''))
-        print qry
+        print(qry)
 else:
     # Write the new merged list of items to a rss file
     try:
@@ -421,10 +421,10 @@ else:
         )
     except IOError:
         if not silent:
-            print "couldn't write merged.rss file" + str(sys.exc_value)
+            print("couldn't write merged.rss file" + str(sys.exc_info()[1]))
     except:
         if not silent:
-            print "Unknow error: " + str(sys.exc_value)
+            print("Unknow error: " + str(sys.exc_info()[1]))
 
 # Write the new list of seen items to a rss file
 try:
@@ -437,7 +437,7 @@ try:
     )
 except IOError:
     if not silent:
-        print "couldn't write merged.rss file" + str(sys.exc_value)
+        print("couldn't write merged.rss file" + str(sys.exc_info()[1]))
 except:
     if not silent:
-        print "Unknow error: " + str(sys.exc_value)
+        print("Unknow error: " + str(sys.exc_info()[1]))
