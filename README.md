@@ -18,11 +18,7 @@ You can find some screenshots here:
 Requirements
 ------------
 
-*   Python 2.6+
-
-RssMerger can run on older Python versions (2.1+). In those cases, it requires:
-
-*   PyXML (`aptitude install python-xml`)
+*   Python 3.8+
 
 
 Running
@@ -44,7 +40,7 @@ rssmerger.py takes a couple of options:
 
 ### Specifiying RSS feeds
 
-For now you'll have to specify your RSS feeds in the rssmerger.py source.
+Feeds should be specified in `feeds.json`.
 The feeds need to be specified as a dictionary. For each feed a key and a
 URL should be given. The key shouldn't contain weird characters. Just use
 A-Z.
@@ -108,5 +104,6 @@ provided with this program.
 
 ### Credits
 
+*   José Maia - Python 3.x port and improvements.
 *   Bastiaan Schenk - Query suggestion & testing.
 *   Jeroen Leijen - Bug reports.

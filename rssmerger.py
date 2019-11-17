@@ -41,6 +41,9 @@
 #    Deprecate python-xml. Now uses built-in XML package.
 #    Python 2.6+ compatibility
 #
+# 1.0
+#    Python 3 port
+#    Load RSS feeds from file
 # Copyright (C) 2004-2013 Ferry Boender <f.boender@electricmonk.nl>"
 #
 # This program is free software; you can redistribute it and/or modify"
@@ -64,11 +67,11 @@ import urllib.request, urllib.parse, urllib.error
 import time
 import getopt
 import xml.dom.minidom
+import json
 
 # URL's for feeds to merge. Do not use weird chars in key.
-rssUrls = {
-    "test":"http://tweakers.net/feeds/meuktracker.xml",
-}
+with open('feeds.json') as json_file:
+    rssUrls = json.load(json_file)
 
 rssItemsMax = 60
 silent = 0
