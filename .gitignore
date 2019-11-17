@@ -126,3 +126,7 @@ dmypy.json
 
 # IntelliJ IDEA files
 .idea/
+
+#Ignore changes to *.rss files, as these should never be committed
+merged.rss
+seen.rss
