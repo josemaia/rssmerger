@@ -130,3 +130,6 @@ dmypy.json
 #Ignore changes to *.rss files, as these should never be committed
 merged.rss
 seen.rss
+
+#Ignore feeds.json as we will want to change it
+feeds.json
