@@ -63,7 +63,9 @@
 
 import sys
 import socket
-import urllib.request, urllib.parse, urllib.error
+import urllib.request
+import urllib.parse
+import urllib.error
 import time
 import getopt
 import xml.dom.minidom
@@ -78,13 +80,14 @@ silent = 0
 verbose = 0
 queries = False
 
+
 def rssFetch(url):
     """
     Fetch a RSS file from somewhere.
     """
 
     try:
-        f_rss = urllib.request.urlopen (url)
+        f_rss = urllib.request.urlopen(url)
     except IOError as e:
         if not silent and url != 'file://merged.rss' and url != 'file://seen.rss':
             print("Failed to retrieve RSS feed %s" % (url))
@@ -92,19 +95,22 @@ def rssFetch(url):
 
     return f_rss.read()
 
-def rssWrite (filename, channelTitle, channelDescription, channelLink, items):
+
+def rssWrite(filename, channelTitle, channelDescription, channelLink, items):
     """
     Write items to a RSS2.0 file
     """
 
     rssNew = xml.dom.minidom.Document()
-    elemRss = rssNew.createElementNS("http://blogs.law.harvard.edu/tech/rss", "rss")
+    elemRss = rssNew.createElementNS(
+        "http://blogs.law.harvard.edu/tech/rss", "rss")
     elemRss.setAttribute("version", "2.0")
 
     elemChannel = rssNew.createElement("channel")
     elemChannel.appendChild(createElementText("title", channelTitle))
     elemChannel.appendChild(createElementText("link", channelLink))
-    elemChannel.appendChild(createElementText("description", channelDescription))
+    elemChannel.appendChild(createElementText(
+        "description", channelDescription))
 
     for item in items:
         elemChannel.appendChild(rssComposeItem(item))
@@ -117,7 +123,7 @@ def rssWrite (filename, channelTitle, channelDescription, channelLink, items):
     rssFile.close()
 
 
-def createElementText (element, text):
+def createElementText(element, text):
     """
     Create an XML DOM element with a child Text node and return it
     """
@@ -128,7 +134,8 @@ def createElementText (element, text):
 
     return elemNew
 
-def createElementTextNS (namespace, element, text):
+
+def createElementTextNS(namespace, element, text):
     """
     Create an XML DOM element with a child Text node and return it
     """
@@ -141,7 +148,7 @@ def createElementTextNS (namespace, element, text):
     return elemNew
 
 
-def rssComposeItem (item):
+def rssComposeItem(item):
     """
     Composes a RSS <item> element from the item dict
     """
@@ -151,14 +158,16 @@ def rssComposeItem (item):
     elemItem.appendChild(createElementText("title", item["title"]))
     elemItem.appendChild(createElementText("link", item["link"]))
     elemItem.appendChild(createElementText("date", item["date"]))
-    elemItem.appendChild(createElementTextNS("http://localhost/rssmerger/", "rm:publisher", item["publisher"]))
+    elemItem.appendChild(createElementTextNS(
+        "http://localhost/rssmerger/", "rm:publisher", item["publisher"]))
     if "description" in item:
-        elemItem.appendChild(createElementText("description", item["description"]))
+        elemItem.appendChild(createElementText(
+            "description", item["description"]))
 
     return elemItem
 
 
-def rssItemElementGetData (node, rssID):
+def rssItemElementGetData(node, rssID):
     global verbose
     if hasattr(node, 'data'):
         return(node.data.strip())
@@ -167,7 +176,8 @@ def rssItemElementGetData (node, rssID):
             print("Node has no data in %s! (HTML tag in data?)" % (rssID))
         return("??")
 
-def rssExtractItem (node, rssID):
+
+def rssExtractItem(node, rssID):
     """
     Given an <item> node, extract all possible RSS information from the node
     """
@@ -183,22 +193,30 @@ def rssExtractItem (node, rssID):
     for childNode in node.childNodes:
         if childNode.firstChild != None:
             if childNode.nodeName == "title":
-                rssItem["title"] = rssItemElementGetData(childNode.firstChild, rssID)
+                rssItem["title"] = rssItemElementGetData(
+                    childNode.firstChild, rssID)
             if childNode.nodeName == "link":
-                rssItem["link"] = rssItemElementGetData(childNode.firstChild, rssID)
+                rssItem["link"] = rssItemElementGetData(
+                    childNode.firstChild, rssID)
             if childNode.nodeName == "description":
-                rssItem["description"] = rssItemElementGetData(childNode.firstChild, rssID)
+                rssItem["description"] = rssItemElementGetData(
+                    childNode.firstChild, rssID)
             if childNode.nodeName == "content:encoded":
-                rssItem["description"] = rssItemElementGetData(childNode.firstChild, rssID)
+                rssItem["description"] = rssItemElementGetData(
+                    childNode.firstChild, rssID)
             if childNode.nodeName == "rm:publisher":
-                rssItem["publisher"] = rssItemElementGetData(childNode.firstChild, rssID)
+                rssItem["publisher"] = rssItemElementGetData(
+                    childNode.firstChild, rssID)
             if childNode.nodeName == "date":
-                rssItem["date"] = rssItemElementGetData(childNode.firstChild, rssID)
+                rssItem["date"] = rssItemElementGetData(
+                    childNode.firstChild, rssID)
 
     if verbose:
-        print("\t\tItem: " + rssItem["publisher"].encode('ascii', 'replace') + ": " + rssItem["title"].encode('ascii', 'replace'))
+        print("\t\tItem: " + rssItem["publisher"].encode('ascii',
+                                                         'replace') + ": " + rssItem["title"].encode('ascii', 'replace'))
 
     return rssItem
+
 
 def rssFindItems(node, rssItems, rssID):
     """
@@ -213,6 +231,7 @@ def rssFindItems(node, rssItems, rssID):
                 rssFindItems(childNode, rssItems, rssID)
 
     return (rssItems)
+
 
 def usage():
     """
@@ -233,6 +252,7 @@ def usage():
     print("  -h, --help          Show short help message (this)")
     print()
     print("(C) Ferry Boender, 2004-2013 <ferry.boender@electricmonk.nl>")
+
 
 def version():
     """
@@ -257,9 +277,11 @@ def version():
     print("along with this program; if not, write to the Free Software")
     print("Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA")
 
+
 # Parse commandline options
 try:
-    opts, args = getopt.getopt(sys.argv[1:], "hsqvVi:", ["help", "silent", "queries", "verbose", "version", "items:"])
+    opts, args = getopt.getopt(sys.argv[1:], "hsqvVi:", [
+                               "help", "silent", "queries", "verbose", "version", "items:"])
 except getopt.GetoptError:
     usage()
     sys.exit(2)
@@ -343,7 +365,8 @@ for rssID in list(rssUrls.keys()):
         root = xml.dom.minidom.parseString(rssPub)
     except:
         if not silent:
-            print("Cannot parse " + rssUrls[rssID] + ": " + str(sys.exc_info()[1]))
+            print("Cannot parse " +
+                  rssUrls[rssID] + ": " + str(sys.exc_info()[1]))
     else:
         # Walk through all root-items (handles xml-stylesheet, etc)
         for rootNode in root.childNodes:
@@ -360,7 +383,8 @@ for rssID in list(rssUrls.keys()):
                     lastId = -1
                     for i in range(len(rssItemsLastSeen)):
                         if verbose:
-                            print("Find last seen: " + rssItemsLastSeen[i]["publisher"].encode('ascii', 'replace') + " - " + rssID)
+                            print("Find last seen: " + rssItemsLastSeen[i]["publisher"].encode(
+                                'ascii', 'replace') + " - " + rssID)
                         if rssItemsLastSeen[i]["publisher"] == rssID:
                             lastId = i
 
@@ -368,7 +392,8 @@ for rssID in list(rssUrls.keys()):
                     if lastId > -1:
                         rssItemLastSeenTitle = rssItemsLastSeen[lastId]["title"]
                         if verbose:
-                            print("\tLast seen for " + rssID + ": " + rssItemLastSeenTitle.encode('ascii', 'replace'))
+                            print("\tLast seen for " + rssID + ": " +
+                                  rssItemLastSeenTitle.encode('ascii', 'replace'))
 
                     # First extract all new rss items
                     for rssItem in rssItemsPub:
@@ -378,31 +403,31 @@ for rssID in list(rssUrls.keys()):
                         else:
                             # Ah, a new item. Let's add it to the merged list of seen and unseen items
                             if len(rssItemsMerged) < rssItemsMax:
-                                rssItemsMerged.append (rssItem)
+                                rssItemsMerged.append(rssItem)
                             # Also add it to a seperate list of all new items
                             rssItemsNew.append(rssItem)
 
                     # Save the new latest seen item
-                    rssItemsNewLastSeen.append (rssItemsPub[0])
+                    rssItemsNewLastSeen.append(rssItemsPub[0])
 
 # Now add all items we've already seen to the list too.
 for rssItem in rssItemsSeen:
     if len(rssItemsMerged) < rssItemsMax:
-        rssItemsMerged.append (rssItem)
+        rssItemsMerged.append(rssItem)
 
 # find feeds which don't have a 'last seen' item anymore due to errors in
 # the rss feed or something and set it back to the previous last seen item
 for rssID in list(rssUrls.keys()):
-    found = 0;
+    found = 0
     for rssItem in rssItemsNewLastSeen:
         if rssItem["publisher"] == rssID:
-            found = 1;
+            found = 1
 
     if found == 0:
         # Find old last seen item
         for rssItem in rssItemsLastSeen:
             if rssItem["publisher"] == rssID:
-                rssItemsNewLastSeen.append (rssItem)
+                rssItemsNewLastSeen.append(rssItem)
 
 if queries:
     rssItemsNew.reverse()
@@ -410,12 +435,13 @@ if queries:
         # Remove Unicode encodings for Database.
         for property in rssItem:
             rssItem[property] = rssItem[property].encode('ascii', 'replace')
-        qry = "INSERT INTO rssitems (title, link, date, publisher, description) VALUES ('%s','%s','%s','%s', '%s');" % (rssItem["title"].replace('\'', '\\\''), rssItem["link"].replace('\'', '\\\''), rssItem["date"].replace('\'', '\\\''), rssItem["publisher"].replace('\'', '\\\''), rssItem["description"].replace('\'', '\\\''))
+        qry = "INSERT INTO rssitems (title, link, date, publisher, description) VALUES ('%s','%s','%s','%s', '%s');" % (rssItem["title"].replace('\'', '\\\''), rssItem["link"].replace(
+            '\'', '\\\''), rssItem["date"].replace('\'', '\\\''), rssItem["publisher"].replace('\'', '\\\''), rssItem["description"].replace('\'', '\\\''))
         print(qry)
 else:
     # Write the new merged list of items to a rss file
     try:
-        rssWrite (
+        rssWrite(
             "merged.rss",
             "rssmerger Merged items",
             "This file contains items which have been merged from various RSS feeds",
@@ -431,12 +457,12 @@ else:
 
 # Write the new list of seen items to a rss file
 try:
-    rssWrite (
-    "seen.rss",
-    "rssmerger Seen items",
-    "This file contains the last seen items for each feed",
-    "http://www.electricmonk.nl",
-    rssItemsNewLastSeen
+    rssWrite(
+        "seen.rss",
+        "rssmerger Seen items",
+        "This file contains the last seen items for each feed",
+        "http://www.electricmonk.nl",
+        rssItemsNewLastSeen
     )
 except IOError:
     if not silent:

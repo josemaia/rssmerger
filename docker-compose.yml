@@ -1,0 +1,12 @@
+version: "3.4"
+
+services:
+  rssmerger:
+    image: rssmerger
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ~/rssmerger/feeds.json:/app/feeds.json:ro
+      - ~/rssmerger/merged.rss:/app/merged.rss
+      - ~/rssmerger/seen.rss:/app/seen.rss
