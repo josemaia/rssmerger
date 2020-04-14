@@ -75,7 +75,7 @@ import json
 with open('feeds.json') as json_file:
     rssUrls = json.load(json_file)
 
-rssItemsMax = 60
+rssItemsMax = 1000
 silent = 0
 verbose = 0
 queries = False
